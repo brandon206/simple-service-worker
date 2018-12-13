@@ -44,5 +44,15 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', event => {
     console.log("Service Worker: Fetching");
     event.respondWith(
-        fetch(event.request).catch(() => caches.match(event.request)));
+        fetch(event.request)
+        .then(response => {
+            if (event.request.url.path.matches('/api/userhome')){
+                return caches.open(cacheName).then(cache => {
+                    cache.set(event.request, response.clone());
+                    return response;
+                })
+            }
+            return response;
+        })
+        .catch(() => caches.match(event.request)));
 })
